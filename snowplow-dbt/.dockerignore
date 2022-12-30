@@ -1,0 +1,5 @@
+/target
+.git
+/logs
+/dumky_net/dbt_packages/**/*
+dbt_packages/**/*

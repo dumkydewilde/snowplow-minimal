@@ -1,0 +1,28 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'docker'
+  args: ['build',
+          '--tag=europe-west1-docker.pkg.dev/$PROJECT_ID/snowplow/bigquery-loader:$BUILD_ID',
+          '.']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'europe-west1-docker.pkg.dev/$PROJECT_ID/snowplow/bigquery-loader:$BUILD_ID']
+
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: ['compute', 'instances', 'create-with-container',
+    'snowplow-bigquery-loader', 
+    '--zone', 'europe-west1-b',
+    '--container-image', 'europe-west1-docker.pkg.dev/$PROJECT_ID/snowplow/bigquery-loader:$BUILD_ID',
+    '--provisioning-model', 'SPOT',
+    '--service-account', '${_BQ_LOADER_SERVICE_ACCOUNT}',
+    '--scopes', 'https://www.googleapis.com/auth/cloud-platform'
+    ]
+
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: ['compute', 'instances', 
+  'add-resource-policies', 'snowplow-bigquery-loader',
+  '--zone', 'europe-west1-b',
+  '--resource-policies', 'snowplow-schedule'
+  ]

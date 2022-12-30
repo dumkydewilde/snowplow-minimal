@@ -1,0 +1,32 @@
+steps:
+- id: 'snowplow-schedule'
+  name: 'gcr.io/cloud-builders/gcloud'
+  entrypoint: gcloud
+  args: ['compute', 'resource-policies', 'create', 
+    'instance-schedule', 'snowplow-schedule',
+    '--vm-start-schedule', '23 6-21/3 * * *',
+    '--vm-stop-schedule', '33 6-21/3 * * *',
+    '--region', 'europe-west1']
+
+- id: 'snowplow-collector'
+  name: 'gcr.io/cloud-builders/gcloud'
+  entrypoint: gcloud
+  args: ['builds', 'submit', '--config', 'snowplow-collector/cloudbuild.yaml']
+  waitFor: ['-'] #start in parallel
+  
+- id: 'snowplow-enrich'
+  name: 'gcr.io/cloud-builders/gcloud'
+  entrypoint: gcloud
+  args: ['builds', 'submit', '--config', 'snowplow-enrich/cloudbuild.yaml']
+  waitFor: ['-'] # start in parallel
+
+- id: 'snowplow-loader'
+  name: 'gcr.io/cloud-builders/gcloud'
+  entrypoint: gcloud
+  args: ['builds', 'submit', 
+  '--config', 'snowplow-loader/cloudbuild.yaml',
+  '--substitutions=_BQ_LOADER_SERVICE_ACCOUNT="${_BQ_LOADER_SERVICE_ACCOUNT}"']
+  waitFor: ['snowplow-schedule'] # start in parallel
+
+substitutions:
+    _BQ_LOADER_SERVICE_ACCOUNT: '588679237506-compute@developer.gserviceaccount.com'

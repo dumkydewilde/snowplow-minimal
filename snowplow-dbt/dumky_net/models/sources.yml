@@ -1,0 +1,7 @@
+version: 2
+
+sources:
+  - name: "{{ env_var('BQ_DATASET') }}"
+    tables:
+      - name: web_events
+      - name: snowplow_raw

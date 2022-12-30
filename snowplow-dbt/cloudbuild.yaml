@@ -1,0 +1,41 @@
+substitutions:
+    _BQ_PROJECT_ID: ${PROJECT_ID}
+    _BQ_DATASET: ""
+    _DBT_PROJECT_DIR: "dumky_net"
+    _WEB_EVENTS_START_DATE: "2022-09-28"
+options:
+    dynamic_substitutions: true
+    substitution_option: 'ALLOW_LOOSE'
+
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'docker'
+  args: ['build', 
+          '--build-arg', 'DBT_PROJECT_DIR=${_DBT_PROJECT_DIR}',
+          '--build-arg', 'BQ_PROJECT_ID=${_BQ_PROJECT_ID}', 
+          '--build-arg', 'BQ_DATASET=${_BQ_DATASET}',
+          '--build-arg', 'WEB_EVENTS_START_DATE=${_WEB_EVENTS_START_DATE}',
+          '--tag=$LOCATION-docker.pkg.dev/$PROJECT_ID/snowplow/snowplow-dbt:$BUILD_ID',
+          '.']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', '$LOCATION-docker.pkg.dev/$PROJECT_ID/snowplow/snowplow-dbt:$BUILD_ID']
+
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: [
+    'beta', 'run', 'jobs', 'update',
+    'snowplow-dbt', '--image', '$LOCATION-docker.pkg.dev/$PROJECT_ID/snowplow/snowplow-dbt:$BUILD_ID',
+    '--region', '$LOCATION']
+
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: [
+    'scheduler', 'jobs', 'create', 'http',
+    'snowplow-dbt-schedule', 
+    '--schedule', '23 6-21/3 * * *',
+    '--location', '$LOCATION',
+    '--uri', 'https://$LOCATION-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/$PROJECT_ID/jobs/snowplow-dbt:run',   
+    '--http-method', 'POST',
+    '--oauth-service-account-email', '$PROJECT_NUMBER-compute@developer.gserviceaccount.com'
+    ]

@@ -1,0 +1,8 @@
+public/
+node_modules/
+resources/
+
+#OS
+.DS_Store
+.editorconfig
+**/*.icloud

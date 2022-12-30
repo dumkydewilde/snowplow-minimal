@@ -1,0 +1,24 @@
+{
+  "input": {
+    "subscription": "projects/forward-ellipse-282119/subscriptions/snowplow-good-sub"
+  }
+
+  "output": {
+    "good": {
+      "topic": "projects/forward-ellipse-282119/topics/snowplow-enriched"
+    }
+
+    "bad": {
+      "topic": "projects/forward-ellipse-282119/topics/snowplow-bad"
+    }
+  }
+
+  "monitoring": {
+    "metrics": {
+      "hostname": "localhost"
+      "port": 8080
+      "prefix": "snowplow.enrich."
+      "period": "10 seconds"
+    }
+  }
+}

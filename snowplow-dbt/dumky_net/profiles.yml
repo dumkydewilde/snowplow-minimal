@@ -1,0 +1,20 @@
+dumky_net:
+  target: dev_dumky
+  outputs:
+    dev_dumky:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('BQ_PROJECT_ID') }}"
+      dataset: "{{ env_var('BQ_DATASET') }}"
+      location: "{{ env_var('BQ_LOCATION') }}"
+      threads: 4
+    
+    prod:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('BQ_PROJECT_ID') }}"
+      dataset: "{{ env_var('BQ_DATASET') }}"
+      location: "{{ env_var('BQ_LOCATION') }}"
+      threads: 1
+      timeout_seconds: 1200
+      retries: 1

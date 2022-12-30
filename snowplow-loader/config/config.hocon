@@ -1,0 +1,59 @@
+{
+  "projectId": "forward-ellipse-282119"
+
+  "loader": {
+    "input": {
+      "subscription": "snowplow-enriched-sub"
+    }
+
+    "output": {
+      "good": {
+        "datasetId": "snowplow_dumky_net"
+        "tableId": "web_events"
+      }
+
+      "bad": {
+        "topic": "snowplow-bad"
+      }
+
+      "types": {
+        "topic": "snowplow-types"
+      }
+
+      "failedInserts": {
+        "topic": "snowplow-failed-inserts"
+      }
+    }
+  }
+
+  "mutator": {
+    "input": {
+      "subscription": "snowplow-types-sub"
+    }
+
+    "output": {
+      "good": ${loader.output.good} # will be automatically inferred
+    }
+  }
+
+  "repeater": {
+    "input": {
+      "subscription": "snowplow-failed-inserts-sub"
+    }
+
+    "output": {
+      "good": ${loader.output.good} # will be automatically inferred
+
+      "deadLetters": {
+        "bucket": "gs://dead-letter-bucket"
+      }
+    }
+  }
+
+  "monitoring": {
+    "stdout": {
+      "period": "2 min"
+      "prefix": "snowplow.monitoring"
+    }
+  }
+}

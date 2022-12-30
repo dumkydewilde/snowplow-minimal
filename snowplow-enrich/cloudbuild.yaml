@@ -1,0 +1,25 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'docker'
+  args: ['build',
+          '--tag=europe-west1-docker.pkg.dev/$PROJECT_ID/snowplow/enrich-pubsub:$BUILD_ID',
+          '.']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'europe-west1-docker.pkg.dev/$PROJECT_ID/snowplow/enrich-pubsub:$BUILD_ID']
+
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: ['compute', 'instances', 'create-with-container',
+    'snowplow-enrich', 
+    '--container-image', 'europe-west1-docker.pkg.dev/$PROJECT_ID/snowplow/enrich-pubsub:$BUILD_ID',
+    '--provisioning-model', 'SPOT',
+    '--zone', 'europe-west1-b'
+    ]
+
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args: ['compute', 'instances', 
+  'add-resource-policies', 'snowplow-enrich',
+    '--resource-policies', 'snowplow-schedule'
+  ]
