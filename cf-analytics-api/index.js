@@ -21,6 +21,7 @@ async function gatherResponse(response) {
    * @returns {Promise<Response>}
    */
   async function handleRequest(request, env) {
+    const baseURL = `https://storage.googleapis.com/${env.STORAGE_BUCKET}`
     const { pathname } = new URL(request.url);
     const init = {
       headers: {
@@ -32,17 +33,17 @@ async function gatherResponse(response) {
   
     if (pathname.startsWith("/analytics/json/pageviews")) {
       console.log(env.STORAGE_BUCKET)
-      const url = `https://storage.googleapis.com/${env.STORAGE_BUCKET}/json/pageviews/000000000000.json`
+      const url = `${baseURL}/json/pageviews/000000000000.json`
       const response = await fetch(url, init);
       const results = await gatherResponse(response);
       return new Response("["+results.trim().split(/\r?\n/)+"]", init);
     } else if (pathname.startsWith("/analytics/json/referrers")) {
-      const url = `https://storage.googleapis.com/${env.STORAGE_BUCKET}/json/referrers/000000000000.json`
+      const url = `${baseURL}/json/referrers/000000000000.json`
       const response = await fetch(url, init);
       const results = await gatherResponse(response);
       return new Response("["+results.trim().split(/\r?\n/)+"]", init);
     } else if (pathname.startsWith("/analytics/json/topposts")) {
-      const url = `https://storage.googleapis.com/${env.STORAGE_BUCKET}/json/topposts/000000000000.json`
+      const url = `${baseURL}/json/topposts/000000000000.json`
       const response = await fetch(url, init);
       const results = await gatherResponse(response);
       return new Response("["+results.trim().split(/\r?\n/)+"]", init);
