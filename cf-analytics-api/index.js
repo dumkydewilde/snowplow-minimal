@@ -32,7 +32,6 @@ async function gatherResponse(response) {
       
   
     if (pathname.startsWith("/analytics/json/pageviews")) {
-      console.log(env.STORAGE_BUCKET)
       const url = `${baseURL}/json/pageviews/000000000000.json`
       const response = await fetch(url, init);
       const results = await gatherResponse(response);
